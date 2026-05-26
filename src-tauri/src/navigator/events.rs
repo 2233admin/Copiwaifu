@@ -9,6 +9,7 @@ pub enum AgentType {
     Copilot,
     Codex,
     Gemini,
+    #[serde(rename = "opencode", alias = "open-code", alias = "open_code")]
     OpenCode,
 }
 
@@ -307,4 +308,33 @@ pub struct NavigatorStatus {
 pub enum NavigatorEmission {
     StateChange(StateChangePayload),
     SessionsChanged(NavigatorSessionsPayload),
+}
+
+#[cfg(test)]
+mod tests {
+    use super::AgentType;
+
+    #[test]
+    fn opencode_serializes_to_frontend_agent_type() {
+        assert_eq!(
+            serde_json::to_string(&AgentType::OpenCode).unwrap(),
+            "\"opencode\""
+        );
+    }
+
+    #[test]
+    fn opencode_deserializes_legacy_spellings() {
+        assert_eq!(
+            serde_json::from_str::<AgentType>("\"opencode\"").unwrap(),
+            AgentType::OpenCode
+        );
+        assert_eq!(
+            serde_json::from_str::<AgentType>("\"open-code\"").unwrap(),
+            AgentType::OpenCode
+        );
+        assert_eq!(
+            serde_json::from_str::<AgentType>("\"open_code\"").unwrap(),
+            AgentType::OpenCode
+        );
+    }
 }
